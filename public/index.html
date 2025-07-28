@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MolecuLab</title>
+  <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+  document.addEventListener("DOMContentLoaded", async () => {
+    const noticeList = document.getElementById("notice-list");
+
+    // Show a loading indicator while fetching
+    noticeList.innerHTML = `
+      <li id="loading-spinner" class="text-gray-500 animate-pulse">
+        Loading notices...
+      </li>
+    `;
+
+    try {
+      const response = await fetch("/notices");
+      const notices = await response.json();
+
+      // Clear loading message
+      noticeList.innerHTML = "";
+
+      if (notices.length === 0) {
+        noticeList.innerHTML = `<li class="text-gray-500">No notices found.</li>`;
+        return;
+      }
+
+      // Create and append all notices using a fragment
+      const fragment = document.createDocumentFragment();
+
+      notices.forEach(notice => {
+        const listItem = document.createElement("li");
+        listItem.innerHTML = `
+          <div class="flex justify-between items-center rounded hover:bg-gray-100 transition">
+            <a 
+              href="/notices/${notice.id}/pdf" 
+              target="_blank" 
+              class="text-gray-700 hover:text-blue-600 underline text-sm"
+              download
+            >
+              <span class="text-base">${notice.noticename}</span>
+            </a>
+          </div>
+        `;
+        fragment.appendChild(listItem);
+      });
+
+      noticeList.appendChild(fragment);
+
+    } catch (error) {
+      console.error("Error loading notices:", error);
+      noticeList.innerHTML = `
+        <li class="text-red-500">⚠️ Failed to load notices. Please try again later.</li>
+      `;
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const toggleButton = document.getElementById('menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    toggleButton.addEventListener('click', function () {
+      mobileMenu.classList.toggle('hidden');
+    });
+  });
+
+
+  window.addEventListener("load", () => {
+    const curtain = document.getElementById("curtain-loader");
+    const mainContent = document.querySelector("main");
+    const header = document.querySelector("header");
+
+    // Add initial hidden states
+    mainContent.classList.add("content-enter");
+    header.classList.add("header-enter");
+
+    setTimeout(() => {
+      // Slide curtain down
+      curtain.classList.add("curtain-hide");
+
+      // Reveal content & header
+      mainContent.classList.add("content-enter-active");
+      header.classList.add("header-enter-active");
+
+      // Remove the curtain from DOM after animation
+      setTimeout(() => {
+        curtain.style.display = "none";
+      }, 1000);
+    }, 1000); // Delay for loading effect
+  });
+
+  window.addEventListener("DOMContentLoaded", () => {
+    setTimeout(() => {
+      const board = document.getElementById("notice-board");
+      board.classList.remove("translate-y-full", "opacity-0");
+      board.classList.add("translate-y-0", "opacity-100");
+    }, 2500);
+  });
+
+  window.addEventListener("DOMContentLoaded", () => {
+    setTimeout(() => {
+      const events = document.getElementById("events-board");
+      events.classList.remove("translate-y-full", "opacity-0");
+      events.classList.add("translate-y-0", "opacity-100");
+    }, 2600);
+  });
+
+</script>
+
+  <style>
+    /* For Webkit Browsers (Chrome, Edge, Safari, Opera) */
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 2px; /* Width of the scrollbar */
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: #a0aec0; /* Color of the scrollbar thumb */
+        border-radius: 2px; /* Rounded corners */
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background-color: #718096; /* Color on hover */
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: #edf2f7; /* Background color of the scrollbar track */
+    }
+
+    /* For Firefox */
+    .custom-scrollbar {
+        scrollbar-width: thin; /* Makes scrollbar thinner */
+        scrollbar-color: #a0aec0 #edf2f7; /* Thumb color and track color */
+    }
+
+  
+    .underline-animation::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%) scaleX(0);
+      transform-origin: center;
+      width: 100%;
+      height: 2px;
+      background-color: currentColor;
+      transition: transform 0.3s ease;
+    }
+
+    .underline-animation:hover::after {
+      transform: translateX(-50%) scaleX(1);
+    }
+
+    .hover-slide {
+    position: relative;
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    color: white;
+    background-color: #4B164C;
+    border: 2px solid #4B164C;
+    border-radius: 5px;
+    overflow: hidden;
+    transition: color 0.4s ease;
+    z-index: 1;
+  }
+
+  .hover-slide::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    transition: left 0.4s ease;
+    z-index: -1;
+  }
+
+  .hover-slide:hover::before {
+    left: 0;
+  }
+
+  .hover-slide:hover {
+    color: #4B164C;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+
+  .animate-pulse {
+    animation: pulse 1.5s infinite;
+  }
+
+  .card-hover-effect {
+    transition: all 0.3s ease;
+  }
+
+  .card-hover-effect:hover {
+    box-shadow: 0 10px 15px -3px rgba(75, 22, 76, 0.5), 0 4px 6px -2px rgba(75, 22, 76, 0.4);
+    transform: scale(1.05);
+  }
+
+  /* Curtain loader */
+  #curtain-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #4B164C; /* Matches your theme */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: transform 1s ease;
+  }
+
+  #curtain-loader span {
+    color: white;
+    font-size: 2rem;
+    animation: pulse 1.5s infinite;
+  }
+
+  /* Slide up curtain */
+  .curtain-hide {
+    transform: translateY(100%);
+  }
+
+  /* Animate main content from bottom */
+  .content-enter {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: all 0.8s ease;
+  }
+
+  .content-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Animate header from top */
+  .header-enter {
+    opacity: 0;
+    transform: translateY(-50px);
+    transition: all 0.8s ease;
+  }
+
+  .header-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+ 
+/* KEYFRAMES */
+@keyframes spin {
+  from { transform: rotate(0); }
+  to { transform: rotate(359deg); }
+}
+@keyframes spin3D {
+  0%   { transform: rotate3d(.5,.5,.5, 360deg); }
+  100% { transform: rotate3d(0deg); }
+}
+
+/* ORBIT ANIMATION SETUP */
+.spinner-box {
+  width: 300px;
+  height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: transparent;
+  position: relative;
+}
+.leo {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+}
+.blue-orbit {
+  width: 165px;
+  height: 165px;
+  border: 2px solid #05f5f5;
+  animation: spin3D 3s linear .2s infinite;
+}
+.green-orbit {
+  width: 120px;
+  height: 120px;
+  border: 2px solid #91ffbfa5;
+  animation: spin3D 2s linear 0s infinite;
+}
+.red-orbit {
+  width: 90px;
+  height: 90px;
+  border: 2px solid #ffca91a5;
+  animation: spin3D 1s linear 0s infinite;
+}
+.white-orbit {
+  width: 60px;
+  height: 60px;
+  border: 1px solid #ffffff;
+  animation: spin3D 10s linear 0s infinite;
+}
+.w1 { transform: rotate3D(1, 1, 1, 90deg); }
+.w2 { transform: rotate3D(1, 2, .5, 90deg); }
+.w3 { transform: rotate3D(.5, 1, 2, 90deg); }
+
+/* Fade-out transition (optional if you want to hide loader later) */
+.fade-out {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+
+
+.dot-jump {
+  display: flex;
+  gap: 8px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  background-color: #4B164C;
+  border-radius: 50%;
+  transform: translateY(0);
+  animation: none;
+}
+
+/* Sequential jump animation using steps for full control */
+@keyframes sequential-jump {
+  0%, 24% {
+    transform: translateY(0);
+  }
+  12% {
+    transform: translateY(-10px);
+  }
+  25%, 100% {
+    transform: translateY(0);
+  }
+}
+
+/* Apply offset for each dot */
+.dot-1 {
+  animation: sequential-jump 1.2s infinite;
+  animation-delay: 0s;
+}
+
+.dot-2 {
+  animation: sequential-jump 1.2s infinite;
+  animation-delay: 0.3s;
+}
+
+.dot-3 {
+  animation: sequential-jump 1.2s infinite;
+  animation-delay: 0.6s;
+}
+
+.dot-4 {
+  animation: sequential-jump 1.2s infinite;
+  animation-delay: 0.9s;
+}
+
+
+  </style>
+</head>
+<body>
+  <div id="curtain-loader" class="fixed inset-0 bg-[#1d2630] z-50 flex flex-col items-center justify-center">
+    <div class="spinner-box">
+      <div class="blue-orbit leo"></div>
+      <div class="green-orbit leo"></div>
+      <div class="red-orbit leo"></div>
+      <div class="white-orbit w1 leo"></div>
+      <div class="white-orbit w2 leo"></div>
+      <div class="white-orbit w3 leo"></div>
+    </div>
+    <p class="text-white text-xl mt-6 font-semibold">MolecuLab</p>
+  </div>
+
+    <!-- Header -->
+<!-- Header -->
+<header class="fixed top-0 left-0 w-full z-50 slide-from-top" style="background-color: #F8E7F6;">
+  <div class="container mx-auto grid grid-cols-3 items-center justify-between p-4">
+    <!-- Logo -->
+    <div class="flex items-center space-x-2 col-span-1">
+      <img src="./assets/logo.png" alt="MolecuLab Logo" class="h-10 w-10">
+      <h1 class="text-xl font-bold" style="color: #4B164C;">MolecuLab</h1>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="hidden lg:flex space-x-4 justify-center col-span-1">
+      <a href="#home" class="relative text-[#4B164C] hover:text-[#0B1D51] transition-colors inline-block underline-animation">Home</a>
+      <a href="#about" class="relative text-[#4B164C] hover:text-[#0B1D51] transition-colors inline-block underline-animation">About</a>
+      <a href="#events" class="relative text-[#4B164C] hover:text-[#0B1D51] transition-colors inline-block underline-animation">Events</a>
+      <a href="#projects" class="relative text-[#4B164C] hover:text-[#0B1D51] transition-colors inline-block underline-animation">Projects</a>
+      <a href="#contacts" class="relative text-[#4B164C] hover:text-[#0B1D51] transition-colors inline-block underline-animation">Contacts</a>
+    </nav>
+
+    <!-- Buttons -->
+    <div class="hidden lg:flex space-x-4 justify-end col-span-1">
+      <a href="./members.html" class="px-4 py-2 text-white rounded hover-slide" style="background-color: #4B164C;">Members</a>
+      <a href="./login.html" class="px-4 py-2 text-white rounded hover-slide" style="background-color: #4B164C;">Admin</a>
+      <a href="https://google.com/forms" target="_blank" class="px-4 py-2 text-white rounded hover-slide" style="background-color: #4B164C;">Apply</a>
+    </div>
+
+    <!-- Hamburger Menu Icon (for <1024px) -->
+    <div class="lg:hidden col-span-2 flex justify-end">
+      <button id="menu-toggle" class="text-[#4B164C] focus:outline-none">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Menu (optional toggle section) -->
+  <div id="mobile-menu" class="lg:hidden hidden px-4 pb-4">
+    <nav class="flex flex-col space-y-2">
+        <div><a href="#home" class="relative text-[#4B164C] hover:text-[#0B1D51] transition-colors inline-block underline-animation">Home</a></div>
+        <div><a href="#about" class="relative text-[#4B164C] hover:text-[#0B1D51] transition-colors inline-block underline-animation">About</a></div>
+        <div><a href="#events" class="relative text-[#4B164C] hover:text-[#0B1D51] transition-colors inline-block underline-animation">Events</a></div>
+        <div><a href="#projects" class="relative text-[#4B164C] hover:text-[#0B1D51] transition-colors inline-block underline-animation">Projects</a></div>
+        <div><a href="#contacts" class="relative text-[#4B164C] hover:text-[#0B1D51] transition-colors inline-block underline-animation">Contacts</a></div>
+      
+      <!-- Buttons -->
+      
+        <a href="./members.html" class="px-4 py-2 text-white rounded hover-slide flex items-center justify-center" style="background-color: #4B164C; width: 105px; height: 50px;">Members</a>
+        <a href="./login.html" class="px-4 py-2 text-white rounded hover-slide flex items-center justify-center" style="background-color: #4B164C; width: 105px; height: 50px;">Admin</a>
+        <a href="https://google.com/forms" target="_blank" class="px-4 py-2 text-white rounded hover-slide flex items-center justify-center" style="background-color: #4B164C; width: 105px; height: 50px;">Apply</a>
+      
+    </nav>
+  </div>
+</header>
+
+  
+    <!-- Sections -->
+    <main class="mt-10 slide-from-bottom">
+      <!-- Home Section -->
+      <section id="home" class="min-h-screen flex flex-col md:flex-row items-center justify-center px-8 py-12" style="background-color: #F8E7F6;">
+        <!-- Left Column: Greetings -->
+        <div class="md:w-2/3 text-center md:text-left">
+          <div class="flex items-center gap-3 flex-wrap md:flex-nowrap">
+          <h2 class="text-5xl font-bold" style="color: #4B164C;" id="typing-text"></h2>
+
+          <!-- Hidden until typing finishes -->
+          <div id="jumping-dots" class="dot-jump hidden -mb-7">
+            <span class="dot dot-1"></span>
+            <span class="dot dot-2"></span>
+            <span class="dot dot-3"></span>
+            <span class="dot dot-4"></span>
+          </div>
+          <script>
+          document.addEventListener("DOMContentLoaded", () => {
+            const text = "Welcome to MolecuLab";
+            const typingTextElement = document.getElementById("typing-text");
+            const jumpingDots = document.getElementById("jumping-dots");
+            let index = 0;
+            let hasTyped = false;
+            let typingDone = false;
+
+            function updateDotVisibility() {
+              if (!typingDone) return; // Only control visibility after typing
+              if (window.innerWidth >= 1024) {
+                jumpingDots.classList.remove("hidden");
+              } else {
+                jumpingDots.classList.add("hidden");
+              }
+            }
+
+            function typeEffect() {
+              if (index < text.length) {
+                typingTextElement.textContent += text.charAt(index);
+                index++;
+                setTimeout(typeEffect, 100);
+              } else {
+                typingDone = true;
+                updateDotVisibility(); // Show dots based on current screen size
+              }
+            }
+
+            const homeSection = document.getElementById("home");
+            const observer = new IntersectionObserver(
+              (entries) => {
+                entries.forEach((entry) => {
+                  if (entry.isIntersecting && !hasTyped) {
+                    hasTyped = true;
+                    setTimeout(() => {
+                      typeEffect();
+                    }, 1500);
+                    observer.unobserve(homeSection);
+                  }
+                });
+              },
+              { threshold: 0.5 }
+            );
+
+            observer.observe(homeSection);
+
+            // ✅ Watch screen size changes
+            window.addEventListener("resize", updateDotVisibility);
+          });
+        </script>
+
+
+        </div>
+
+          <p class="text-lg text-gray-700 mt-4">
+            The hub for all things chemistry at our university! Explore our mission, faculty, and events.
+          </p>
+        </div>
+      
+        <!-- Right Column: Notice Board and Events Board -->
+        <div class="md:w-1/3 flex flex-col space-y-6 mt-8 md:mt-0">
+    
+          <div id="notice-board"
+            class="shadow-lg rounded-lg p-6 h-48 border-2 border-[#4B164C] transform translate-y-full opacity-0 transition-all duration-700"
+            style="background-color: #F5F5F5;">
+            <h3 class="text-xl font-semibold border-b pb-2 mb-4" style="color: #4B164C;">Notice</h3>
+            <div class="h-20 overflow-y-auto custom-scrollbar">
+              <ul id="notice-list" class="space-y-1">
+                <!-- Notices will be dynamically loaded here -->
+              </ul>
+            </div>
+          </div>
+
+                      
+          <!-- Upcoming Events Board -->
+          <div id="events-board" class="shadow-lg rounded-lg p-6 h-48 border-2 border-[#4B164C] transform translate-y-full opacity-0 transition-all duration-700 ease-out" style="background-color: #F5F5F5;">
+            <h3 class="text-xl font-semibold border-b pb-2 mb-4" style="color: #4B164C;">Coming Events</h3>
+            <div class="h-20 overflow-y-auto custom-scrollbar">
+              <p class="text-gray-700">No Upcoming Events...</p>
+            <!-- <ul class="space-y-1">
+              
+              <li class="flex items-center">
+                <a href="https://example.com/event1" target="_blank" class="text-gray-700 hover:text-blue-600 underline">
+                  ChemFest 2025
+                </a>
+              </li>
+              <li class="flex items-center">
+                <a href="https://example.com/event2" target="_blank" class="text-gray-700 hover:text-blue-600 underline">
+                  Chemistry Hackathon
+                </a>
+              </li>
+              <li class="flex items-center">
+                <a href="https://example.com/event3" target="_blank" class="text-gray-700 hover:text-blue-600 underline">
+                  Organic Chemistry Symposium
+                </a>
+              </li>
+              <li class="flex items-center">
+                <a href="https://example.com/event3" target="_blank" class="text-gray-700 hover:text-blue-600 underline">
+                  Organic Chemistry Symposium
+                </a>
+              </li>
+              <li class="flex items-center">
+                <a href="https://example.com/event3" target="_blank" class="text-gray-700 hover:text-blue-600 underline">
+                  Organic Chemistry Symposium
+                </a>
+              </li>
+              <li class="flex items-center">
+                <a href="https://example.com/event3" target="_blank" class="text-gray-700 hover:text-blue-600 underline">
+                  Organic Chemistry Symposium
+                </a>
+              </li>
+            </ul> -->
+            </div>
+          </div>
+        </div>
+      </section>      
+  
+      <!-- About Section -->
+      <section id="about" class="min-h-screen flex items-center justify-center" style="background-color: #F8E7F6;">
+        <div class="container mx-auto px-6 py-12">
+          <h2 class="text-3xl font-semibold text-center mb-12" style="color: #4B164C;">About Us</h2>
+          <div class="flex flex-col md:flex-row md:space-x-12 space-y-6 md:space-y-0">
+            <!-- Mission -->
+            <div data-aos="fade-up" data-aos-duration="1000" class="w-full md:w-1/2 bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-[#4B164C]">
+              <h3 class="text-2xl font-semibold mb-4" style="color: #4B164C;">Our Mission</h3>
+              <p class="text-gray-700 leading-relaxed">
+                Our mission is to inspire and educate students through the wonders of chemistry. We aim to foster curiosity, promote collaboration, and create opportunities for hands-on learning and experimentation.
+              </p>
+            </div>
+
+            <!-- Vision -->
+            <div data-aos="fade-up" data-aos-duration="1000" data-aos-delay="100" class="w-full md:w-1/2 bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-[#4B164C]">
+              <h3 class="text-2xl font-semibold mb-4" style="color: #4B164C;">Our Vision</h3>
+              <p class="text-gray-700 leading-relaxed">
+                To create an engaging platform for students to explore and innovate in the field of chemistry. We envision MolecuLab as a cornerstone for research, creativity, and academic excellence.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- Project Section -->
+      <section id="projects" class="min-h-screen flex items-center justify-center" style="background-color: #F8E7F6;">
+        <div class="container mx-auto px-6 py-12">
+          <h2 class="text-3xl font-semibold text-center mb-12" style="color: #4B164C;">Projects</h2>
+          <div class="flex flex-col md:flex-row md:space-x-12 space-y-6 md:space-y-0">
+            <!-- Project 1 -->
+            <div data-aos="fade-up" data-aos-duration="1000" class="w-full md:w-1/2 bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-[#4B164C]">
+              <h3 class="text-2xl font-semibold mb-4" style="color: #4B164C;">Project 1</h3>
+              <p class="text-gray-700 leading-relaxed">
+                This is Project1 description.
+              </p>
+              <p class="text-gray-700"><a href="#" class="text-blue-600 hover:underline font-small">click here</a> to learn more.</p>
+            </div>
+
+            <!-- Project 2 -->
+            <div data-aos="fade-up" data-aos-duration="1000" class="w-full md:w-1/2 bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-[#4B164C]">
+              <h3 class="text-2xl font-semibold mb-4" style="color: #4B164C;">Project 2</h3>
+              <p class="text-gray-700 leading-relaxed">
+                This is Project2 description.
+              </p>
+              <p class="text-gray-700"><a href="#" class="text-blue-600 hover:underline font-small">click here</a> to learn more.</p>
+            </div>
+
+            <!-- Project 3 -->
+            <div data-aos="fade-up" data-aos-duration="1000" class="w-full md:w-1/2 bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-[#4B164C]">
+              <h3 class="text-2xl font-semibold mb-4" style="color: #4B164C;">Project 3</h3>
+              <p class="text-gray-700 leading-relaxed">
+                This is Project3 description.
+              </p>
+              <p class="text-gray-700"><a href="#" class="text-blue-600 hover:underline font-small">click here</a> to learn more.</p>
+            </div>
+          </div>
+          <div class="h-2 w-full"></div>
+          <div class="flex flex-col md:flex-row md:space-x-12 space-y-6 md:space-y-0">
+            <!-- Project 1 -->
+            <div data-aos="fade-up" data-aos-duration="1000" class="w-full md:w-1/2 bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-[#4B164C]">
+              <h3 class="text-2xl font-semibold mb-4" style="color: #4B164C;">Project 1</h3>
+              <p class="text-gray-700 leading-relaxed">
+                This is Project1 description.
+              </p>
+              <p class="text-gray-700"><a href="#" class="text-blue-600 hover:underline font-small">click here</a> to learn more.</p>
+            </div>
+
+            <!-- Project 2 -->
+            <div data-aos="fade-up" data-aos-duration="1000" class="w-full md:w-1/2 bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-[#4B164C]">
+              <h3 class="text-2xl font-semibold mb-4" style="color: #4B164C;">Project 2</h3>
+              <p class="text-gray-700 leading-relaxed">
+                This is Project2 description.
+              </p>
+              <p class="text-gray-700"><a href="#" class="text-blue-600 hover:underline font-small">click here</a> to learn more.</p>
+            </div>
+
+            <!-- Project 3 -->
+            <div data-aos="fade-up" data-aos-duration="1000" class="w-full md:w-1/2 bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-[#4B164C]">
+              <h3 class="text-2xl font-semibold mb-4" style="color: #4B164C;">Project 3</h3>
+              <p class="text-gray-700 leading-relaxed">
+                This is Project3 description.
+              </p>
+              <p class="text-gray-700"><a href="#" class="text-blue-600 hover:underline font-small">click here</a> to learn more.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      
+  
+      <!-- Events Section -->
+      <section id="events" class="min-h-screen flex flex-col items-center justify-center py-12" style="background-color: #F8E7F6;">
+        <h2 class="text-3xl font-semibold text-center mb-12" style="color: #4B164C;">Events</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
+          <!-- Event Card 1 -->
+          <div data-aos="fade-up" data-aos-duration="1000" class="bg-white rounded-lg shadow-lg overflow-hidden card-hover-effect border-2 border-[#4B164C]">
+            <img src="./assets/Event1.jpg" alt="Event 2025" class="w-full h-48 object-cover">
+            <div class="p-6">
+              <h3 class="text-2xl font-semibold text-gray-800 mb-2">Event 2025</h3>
+              <p class="text-gray-600 mb-4">An exciting chemistry Event showcasing innovative experiments and ideas.</p>
+              <a href="#" class="text-blue-600 hover:underline font-medium">Learn More</a>
+            </div>
+          </div>
+          <!-- Event Card 1 -->
+          <div data-aos="fade-up" data-aos-duration="1000" class="bg-white rounded-lg shadow-lg overflow-hidden card-hover-effect border-2 border-[#4B164C]">
+            <img src="./assets/Event1.jpg" alt="Event 2025" class="w-full h-48 object-cover">
+            <div class="p-6">
+              <h3 class="text-2xl font-semibold text-gray-800 mb-2">Event 2025</h3>
+              <p class="text-gray-600 mb-4">An exciting chemistry Event showcasing innovative experiments and ideas.</p>
+              <a href="#" class="text-blue-600 hover:underline font-medium">Learn More</a>
+            </div>
+          </div>
+          <!-- Event Card 1 -->
+          <div data-aos="fade-up" data-aos-duration="1000" class="bg-white rounded-lg shadow-lg overflow-hidden card-hover-effect border-2 border-[#4B164C]">
+            <img src="./assets/Event1.jpg" alt="Event 2025" class="w-full h-48 object-cover">
+            <div class="p-6">
+              <h3 class="text-2xl font-semibold text-gray-800 mb-2">Event 2025</h3>
+              <p class="text-gray-600 mb-4">An exciting chemistry Event showcasing innovative experiments and ideas.</p>
+              <a href="#" class="text-blue-600 hover:underline font-medium">Learn More</a>
+            </div>
+          </div>
+          <!-- Event Card 1 -->
+          <div data-aos="fade-up" data-aos-duration="1000" class="bg-white rounded-lg shadow-lg overflow-hidden card-hover-effect border-2 border-[#4B164C]">
+            <img src="./assets/Event1.jpg" alt="Event 2025" class="w-full h-48 object-cover">
+            <div class="p-6">
+              <h3 class="text-2xl font-semibold text-gray-800 mb-2">Event 2025</h3>
+              <p class="text-gray-600 mb-4">An exciting chemistry Event showcasing innovative experiments and ideas.</p>
+              <a href="#" class="text-blue-600 hover:underline font-medium">Learn More</a>
+            </div>
+          </div>
+          <!-- Add more cards as needed -->
+        </div>
+      </section>      
+      
+      <!-- Contacts Section -->
+      <section id="contacts" class="min-h-screen flex items-center justify-center" style="background-color: #F8E7F6;">
+        <div class="container mx-auto px-6 py-12">
+          <h2 class="text-3xl font-semibold text-center mb-12" style="color: #4B164C;">Contact Us</h2>
+          <div class="flex flex-col md:flex-row md:space-x-12 space-y-6 md:space-y-0">
+            <!-- Contact Details -->
+            <div data-aos="fade-up" data-aos-duration="1000" class="w-full md:w-1/2 bg-white p-6 rounded-lg shadow-lg border-2 border-[#4B164C]">
+              <h3 class="text-2xl font-semibold mb-4" style="color: #4B164C;">Get in Touch</h3>
+              <p class="flex items-center text-gray-700 mb-4">
+                <img src="./assets/location.png" alt="Location" class="w-6 h-6 mr-2">
+                Location: Jadavpur University, Kolkata, India
+              </p>
+              <p class="flex items-center text-gray-700 mb-4">
+                <img src="./assets/gmail.png" alt="Email" class="w-6 h-6 mr-2">
+                Email:&nbsp;<a href="mailto:moleculabju@gmail.com" class="text-gray-700 hover:underline"> moleculabju@gmail.com</a>
+              </p>
+              <p class="flex items-center text-gray-700">
+                <img src="./assets/phone.png" alt="Phone" class="w-6 h-6 mr-2">
+                Phone:&nbsp;<a href="tel:+911234567890" class="text-gray-700 hover:underline"> +91 1234567890</a>
+              </p>
+            </div>
+      
+            <!-- Social Media Links -->
+            <div data-aos="fade-up" data-aos-duration="1000" class="w-full md:w-1/2 flex flex-col items-center justify-center">
+              <h3 class="text-2xl font-semibold mb-4" style="color: #4B164C;">Follow Us On</h3>
+              <div class="flex space-x-4">
+                <a href="https://www.linkedin.com/in/moleculab-ju-chemical-association-of-jadavpur-university" target="_blank">
+                  <img src="./assets/linkedin.png" alt="linkedin" class="w-10 h-10 hover:opacity-60">
+                </a>
+                <a href="https://www.facebook.com" target="_blank">
+                  <img src="./assets/facebook.png" alt="Facebook" class="w-10 h-10 hover:opacity-60">
+                </a>
+                <a href="https://www.instagram.com/moleculabju/profilecard/?igsh=MTNuMzl5eWRvc2h3dQ==" target="_blank">
+                  <img src="./assets/instagram.png" alt="Instagram" class="w-10 h-10 hover:opacity-60">
+                </a>
+                
+                <a href="https://www.twitter.com" target="_blank">
+                  <img src="./assets/twiteer.png" alt="Twitter" class="w-10 h-10 hover:opacity-60">
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>      
+      
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+      <script>
+        AOS.init();
+      </script>
+  </body>
+</html>

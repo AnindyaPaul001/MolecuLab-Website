@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+  <!-- Header -->
+  <header class="bg-blue-600 text-white py-4 px-6 flex justify-between items-center">
+    <h1 class="text-2xl font-bold">Admin Panel</h1>
+    <button id="logout-btn" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded text-sm font-medium">Logout</button>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container mx-auto my-8 p-6 bg-white rounded-lg shadow-lg">
+    <!-- Admin Details -->
+    <section class="mb-6">
+      <h2 class="text-xl font-semibold mb-4">Welcome, Admin!</h2>
+      <div class="bg-gray-100 p-4 rounded shadow" id="admin-info">
+        <p><strong>Name:</strong> <span id="admin-name">Loading...</span></p>
+        <p><strong>Department:</strong> <span id="admin-department">Loading...</span></p>
+        <p><strong>Designation:</strong> <span id="admin-designation">Loading...</span></p>
+      </div>
+    </section>
+
+    <!-- Upload Notices -->
+    <section class="mb-6">
+      <h2 class="text-xl font-semibold mb-4">Upload New Notice</h2>
+      <form id="notice-upload-form" class="flex items-center space-x-4" enctype="multipart/form-data">
+        <input type="text" id="notice-name-input" name="noticeName" placeholder="Notice Title"
+               class="border rounded px-4 py-2" required>
+        <input type="file" id="notice-file" name="pdfFile" accept=".pdf" class="border rounded px-4 py-2" required>
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium">
+          Upload
+        </button>
+      </form>
+    </section>
+
+    <!-- Manage Notices -->
+    <section>
+      <h2 class="text-xl font-semibold mb-4">Manage Notices</h2>
+      <table class="w-full border-collapse bg-gray-50">
+        <thead>
+          <tr class="bg-gray-200 text-gray-600">
+            <th class="p-4 border">Notice</th>
+            <th class="p-4 border">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="notices-table">
+          <!-- Notices will be dynamically loaded here -->
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script>
+    // 🧠 1. Get userid from sessionStorage
+    const userid = sessionStorage.getItem("userid");
+    if (!userid) {
+      alert("You are not logged in.");
+      window.location.href = "index.html";
+    }
+
+    // 🧠 2. Fetch and display admin info
+    fetch("/get-admin-info", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userid })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      document.getElementById("admin-name").textContent = data.name;
+      document.getElementById("admin-department").textContent = data.department;
+      document.getElementById("admin-designation").textContent = data.designation;
+    })
+    .catch(err => {
+      console.error("Failed to fetch admin info:", err);
+      alert("Error loading admin details.");
+    });
+
+    // 🧠 3. Logout button
+    document.getElementById('logout-btn').addEventListener('click', function () {
+      sessionStorage.clear();
+      alert('Logging out...');
+      window.location.href = 'index.html';
+    });
+
+    // Upload notice
+document.getElementById('notice-upload-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const name = document.getElementById('notice-name-input').value.trim();
+  const fileInput = document.getElementById('notice-file');
+  if (!name || fileInput.files.length === 0) {
+    alert('Please provide a title and select a PDF!');
+    return;
+  }
+  const formData = new FormData();
+  formData.append('noticeName', name);
+  formData.append('pdfFile', fileInput.files[0]);
+
+  const res = await fetch('/upload-notice', { method: 'POST', body: formData });
+  if (res.ok) {
+    const { id, noticename } = await res.json();
+    const table = document.getElementById('notices-table');
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td class="p-4 border">${noticename}</td>
+      <td class="p-4 border">
+        <a href="/notices/${id}/pdf" target="_blank" class="text-blue-500 hover:underline">View</a>
+        <button data-id="${id}" class="delete-btn bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm font-medium ml-2">Delete</button>
+      </td>`;
+    table.appendChild(row);
+
+    row.querySelector('.delete-btn').addEventListener('click', async e => {
+      const noticeId = e.target.dataset.id;
+      const delRes = await fetch(`/notices/${noticeId}`, { method: 'DELETE' });
+      const data = await delRes.json();
+      if (delRes.ok) {
+        alert(data.message);
+        e.target.closest('tr').remove();
+      } else {
+        alert(data.error);
+      }
+    });
+
+    alert('Notice uploaded successfully!');
+    document.getElementById('notice-name-input').value = '';
+    fileInput.value = '';
+  } else {
+    alert('Upload failed.');
+  }
+});
+
+  // Fetch and display notices
+  fetch("/notices")
+  .then(res => res.json())
+  .then(notices => {
+    const tableBody = document.getElementById("notices-table");
+    notices.forEach(notice => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td class="p-4 border">${notice.noticename}</td>
+        <td class="p-4 border">
+          <a href="/notices/${notice.id}/pdf" target="_blank" class="text-blue-500 hover:underline">View</a>
+          <button data-id="${notice.id}" class="delete-btn bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm font-medium ml-2">Delete</button>
+        </td>`;
+      tableBody.appendChild(row);
+    });
+
+    tableBody.querySelectorAll(".delete-btn").forEach(btn => {
+      btn.addEventListener("click", async e => {
+        const noticeId = e.target.dataset.id;
+        const res = await fetch(`/notices/${noticeId}`, { method: "DELETE" });
+        const data = await res.json();
+        if (res.ok) {
+          alert(data.message);
+          e.target.closest("tr").remove();
+        } else {
+          alert(data.error);
+        }
+      });
+    });
+  })
+
+  .catch(error => {
+    console.error("Error fetching notices:", error);
+    alert("Failed to load notices.");
+  });
+
+  </script>
+</body>
+</html>

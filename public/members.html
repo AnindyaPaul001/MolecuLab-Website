@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Members</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .card {
+      perspective: 1000px;
+    }
+
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 20rem;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+    }
+
+    .card:hover .card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .card-front, .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 1rem;
+    }
+
+    .card-back {
+      transform: rotateY(180deg);
+      background-color: #f3f4f6;
+    }
+
+    .card-front {
+      background-color: #ffffff;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+
+  <div class="container mx-auto p-6">
+    <h1 class="text-3xl font-bold text-center mb-8" style="color: #4B164C;">Our Members</h1>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-8 gap-x-6 sm:gap-y-12 lg:gap-8">
+      <!-- Member Card -->
+      <div class="card w-full max-w-xs mx-auto bg-white shadow-lg rounded-lg border-2 border-[#4B164C]">
+        <div class="card-inner">
+          <!-- Front Side -->
+          <div class="card-front flex flex-col items-center justify-center p-6">
+            <div class="w-24 h-24 rounded-full overflow-hidden mb-4">
+              <img src="./assets/koushani.png" alt="Koushani" class="w-full h-full object-cover">
+            </div>
+            <h3 class="text-xl font-semibold text-gray-800" style="color: #4B164C;">Koushani Mal</h3>
+            <p class="text-gray-600">Founder</p>
+          </div>
+          <!-- Back Side -->
+          <div class="card-back flex flex-col items-center justify-center p-6">
+            <h3 class="text-xl font-semibold text-gray-800">Contact Info</h3>
+            <p class="flex items-center">
+                <img src="./assets/gmail.png" alt="Email" class="w-6 h-6 mr-2">
+                <a href="mailto:moleculab@example.com" class="text-gray-500 hover:underline">moleculab@example.com</a>
+            </p>
+            <p class="flex items-center">
+                <img src="./assets/phone.png" alt="Phone" class="w-6 h-6 mr-2">
+                <a href="tel:+911234567890" class="text-gray-500 hover:underline">+91 1234567890</a>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Additional Cards -->
+      <div class="card w-full max-w-xs mx-auto bg-white shadow-lg rounded-lg border-2 border-[#4B164C]">
+        <div class="card-inner">
+          <!-- Front Side -->
+          <div class="card-front flex flex-col items-center justify-center p-6">
+            <div class="w-24 h-24 rounded-full overflow-hidden mb-4">
+              <img src="./assets/sayak.png" alt="Sayak" class="w-full h-full object-cover">
+            </div>
+            <h3 class="text-xl font-semibold text-gray-800" style="color: #4B164C;">Sayak Da</h3>
+            <p class="text-gray-600">President</p>
+          </div>
+          <!-- Back Side -->
+          <div class="card-back flex flex-col items-center justify-center p-6">
+            <h3 class="text-xl font-semibold text-gray-800">Contact Info</h3>
+            <p class="flex items-center">
+                <img src="./assets/gmail.png" alt="Email" class="w-6 h-6 mr-2">
+                <a href="mailto:moleculab@example.com" class="text-gray-500 hover:underline">moleculab@example.com</a>
+            </p>
+            <p class="flex items-center">
+                <img src="./assets/phone.png" alt="Phone" class="w-6 h-6 mr-2">
+                <a href="tel:+911234567890" class="text-gray-500 hover:underline">+91 1234567890</a>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      
+
+
+      
+
+      
+
+      
+
+      
+      
+    </div>
+  </div>
+
+</body>
+</html>

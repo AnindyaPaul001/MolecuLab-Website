@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #F8E7F6;
+    }
+
+    .login-card {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .login-card h2 {
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .login-card form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .login-card form input {
+      margin-bottom: 1rem;
+      padding: 0.8rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .login-card form button {
+      padding: 0.8rem;
+      background-color: #4B164C;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-card form button:disabled {
+      background-color: #93c5fd;
+      cursor: not-allowed;
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 3px solid white;
+      border-top: 3px solid transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-left: 8px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .error {
+      color: red;
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .hover-slide {
+    position: relative;
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    color: white;
+    background-color: #4B164C;
+    border: 2px solid #4B164C;
+    border-radius: 5px;
+    overflow: hidden;
+    transition: color 0.4s ease;
+    z-index: 1;
+  }
+
+  .hover-slide::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    transition: left 0.4s ease;
+    z-index: -1;
+  }
+
+  .hover-slide:hover::before {
+    left: 0;
+  }
+
+  .hover-slide:hover {
+    color: #4B164C;
+  }
+  </style>
+</head>
+<body>
+  <div class="login-card" style="border: 2px solid #4B164C;" >
+    <h2 style="color: #4B164C;">Admin Login</h2>
+    <form id="login-form">
+      <input type="text" id="userid" placeholder="User ID" required />
+      <input type="password" id="password" placeholder="Password" required />
+      <button type="submit" id="login-button" class="hover-slide">
+        <span class="button-text">Login</span>
+        <span class="spinner" style="display: none;"></span>
+      </button>
+    </form>
+    <div id="error-message" class="error"></div>
+  </div>
+
+  <script>
+    const loginForm = document.getElementById("login-form");
+    const errorMessage = document.getElementById("error-message");
+    const loginButton = document.getElementById("login-button");
+    const buttonText = loginButton.querySelector(".button-text");
+    const spinner = loginButton.querySelector(".spinner");
+
+    loginForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const userid = document.getElementById("userid").value;
+      const password = document.getElementById("password").value;
+
+      // Show loading state
+      buttonText.textContent = "Logging in... (wait)";
+      spinner.style.display = "inline-block";
+      loginButton.disabled = true;
+      errorMessage.textContent = "";
+
+      try {
+        const response = await fetch("/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userid, password }),
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          sessionStorage.setItem("userid", userid); // 🔑 Store userid
+          window.location.href = "/admin.html";
+        } else {
+          errorMessage.textContent = "Invalid User ID or Password!";
+        }
+      } catch (error) {
+        console.error("Login request failed:", error);
+        errorMessage.textContent = "Server error. Please try again.";
+      } finally {
+        // Reset button
+        buttonText.textContent = "Login";
+        spinner.style.display = "none";
+        loginButton.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
